@@ -103,6 +103,15 @@ st.sidebar.slider(
 )
 
 # -------------------------------------------------------------------------
+# Optional overlay: desired profile
+# -------------------------------------------------------------------------
+show_desired_profile = st.sidebar.checkbox(
+    "Show Desired Profile", 
+    value=False,
+    help="Add a black reference line to the Flow vs. Lift plot."
+)
+
+# -------------------------------------------------------------------------
 # Compute and plot
 # -------------------------------------------------------------------------
 if st.session_state.recompute_flag:
@@ -133,6 +142,11 @@ if st.session_state.recompute_flag:
     fig1, ax1 = plt.subplots(figsize=(7, 3))
     ax1.plot(lift, flow_lin, 'b-', label='Linear Valve')
     ax1.plot(lift, flow_ep, 'r--', label='Equal Percentage Valve')
+    
+    # Add desired profile if checkbox is selected
+    if show_desired_profile:
+        ax1.plot([0, 1], [0, 9.4], 'k-', linewidth=2, label='Desired Profile')
+    
     ax1.set_xlabel('Lift')
     ax1.set_ylabel('Flow')
     ax1.set_title('Flow vs. Lift')
