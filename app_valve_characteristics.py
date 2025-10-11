@@ -95,7 +95,7 @@ st.sidebar.slider(
 st.sidebar.slider(
     "Total Pressure Drop (ΔPt)",
     min_value=1.0,
-    max_value=20.0,
+    max_value=100,
     value=st.session_state.DPt,
     step=0.5,
     key="DPt",
@@ -133,8 +133,8 @@ if st.session_state.recompute_flag:
     fig1, ax1 = plt.subplots(figsize=(7, 3))
     ax1.plot(lift, flow_lin, 'b-', label='Linear Valve')
     ax1.plot(lift, flow_ep, 'r--', label='Equal Percentage Valve')
-    ax1.set_xlabel('Lift (fraction open)')
-    ax1.set_ylabel('Flow (arbitrary units)')
+    ax1.set_xlabel('Lift')
+    ax1.set_ylabel('Flow')
     ax1.set_title('Flow vs. Lift')
     ax1.legend()
     ax1.grid(True)
