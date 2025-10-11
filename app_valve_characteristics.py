@@ -95,7 +95,7 @@ st.sidebar.slider(
 st.sidebar.slider(
     "Total Pressure Drop (ΔPt)",
     min_value=1.0,
-    max_value=100,
+    max_value=100.0,
     value=st.session_state.DPt,
     step=0.5,
     key="DPt",
