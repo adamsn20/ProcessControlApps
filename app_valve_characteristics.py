@@ -61,7 +61,7 @@ def recompute():
 if "Cv" not in st.session_state:
     st.session_state.Cv = 5.0
 if "DPt" not in st.session_state:
-    st.session_state.DPt = 10.0
+    st.session_state.DPt = 100.0
 if "R" not in st.session_state:
     st.session_state.R = R_default
 if "recompute_flag" not in st.session_state:
