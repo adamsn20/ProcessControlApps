@@ -50,77 +50,102 @@ def qi(x, f, Cv, R):
     """Flow rate through the valve and process system."""
     return np.sqrt((Cv * f(x, R))**2 * DPt / (g_s + (Cv * f(x, R))**2 * c1))
 
-# -----------------------------------------------------------------------------
-# Sidebar Controls
-# -----------------------------------------------------------------------------
-st.sidebar.header("Valve Parameters")
-
-Cv = st.sidebar.slider("Valve Flow Coefficient (Cv)", 0.1, 10.0, 0.5, 0.1)
-R = st.sidebar.slider("Equal-Percentage Valve Rangeability (R)", 20.0, 50.0, 20.0, 1.0)
-
-st.sidebar.markdown("**Note:** Cv controls overall flow capacity; R affects curvature of equal-percentage trim.")
+def recompute():
+    """Callback function triggered by slider change."""
+    st.session_state.recompute_flag = True
 
 # -----------------------------------------------------------------------------
-# Main Computation
+# Initialize session state
 # -----------------------------------------------------------------------------
-lift = np.linspace(0, 1, 100)  # Valve lift (fraction open)
-flow_lin = qi(lift, f_lin, Cv, R)
-flow_ep = qi(lift, f_ep, Cv, R)
+
+if "Cv" not in st.session_state:
+    st.session_state.Cv = 5.0
+if "DPt" not in st.session_state:
+    st.session_state.DPt = 10.0
+if "recompute_flag" not in st.session_state:
+    st.session_state.recompute_flag = True
+
 
 # -----------------------------------------------------------------------------
-# Plot 1: Flow vs. Lift
+# Sidebar controls with on_change callbacks
 # -----------------------------------------------------------------------------
-fig1, ax1 = plt.subplots(figsize=(7, 5))
-ax1.plot(lift, flow_lin, 'b-', label='Linear Valve')
-ax1.plot(lift, flow_ep, 'r--', label='Equal Percentage Valve')
-ax1.plot([0, 1], [0, 9.4], 'k-', linewidth=2, label='Desired Profile')
-ax1.set_xlabel('Lift (fraction open)')
-ax1.set_ylabel('Flow (arbitrary units)')
-ax1.set_title('Flow vs. Lift')
-ax1.legend(loc='best')
-ax1.grid(True)
-st.pyplot(fig1)
+st.sidebar.header("Valve Settings")
+
+st.sidebar.slider(
+    "Valve Coefficient (Cv)",
+    min_value=0.1,
+    max_value=10.0,
+    value=st.session_state.Cv,
+    step=0.1,
+    key="Cv",
+    on_change=recompute
+)
+
+st.sidebar.slider(
+    "Total Pressure Drop (ΔPt)",
+    min_value=1.0,
+    max_value=20.0,
+    value=st.session_state.DPt,
+    step=0.5,
+    key="DPt",
+    on_change=recompute
+)
 
 # -----------------------------------------------------------------------------
-# Plot 2: Pressure Drops for Linear Trim
+# Only recompute and plot if flagged
 # -----------------------------------------------------------------------------
-fig2, ax2 = plt.subplots(figsize=(7, 4))
-ax2.plot(lift, DPt - DPe(flow_lin), 'k:', linewidth=3, label='Valve ΔP (Linear)')
-ax2.plot(lift, DPe(flow_lin), 'r--', linewidth=3, label='Equipment ΔP')
-ax2.set_xlabel('Lift')
-ax2.set_ylabel('ΔP (pressure drop)')
-ax2.set_title('Pressure Drops – Linear Valve')
-ax2.legend(loc='best')
-ax2.grid(True)
-st.pyplot(fig2)
-
-# -----------------------------------------------------------------------------
-# Plot 3: Pressure Drops for Equal-Percentage Trim
-# -----------------------------------------------------------------------------
-fig3, ax3 = plt.subplots(figsize=(7, 4))
-ax3.plot(lift, DPt - DPe(flow_ep), 'k:', linewidth=3, label='Valve ΔP (Equal %)')
-ax3.plot(lift, DPe(flow_ep), 'r--', linewidth=3, label='Equipment ΔP')
-ax3.set_xlabel('Lift')
-ax3.set_ylabel('ΔP (pressure drop)')
-ax3.set_title('Pressure Drops – Equal-Percentage Valve')
-ax3.legend(loc='best')
-ax3.grid(True)
-st.pyplot(fig3)
-
+if st.session_state.recompute_flag:
+    st.session_state.recompute_flag = False
+    lift = np.linspace(0, 1, 100)  # Valve lift (fraction open)
+    flow_lin = qi(lift, f_lin, Cv, R)
+    flow_ep = qi(lift, f_ep, Cv, R)
+    
+    # -----------------------------------------------------------------------------
+    # Plot 1: Flow vs. Lift (top, wide but shorter)
+    # -----------------------------------------------------------------------------
+    fig1, ax1 = plt.subplots(figsize=(7, 3))  # smaller height
+    ax1.plot(lift, flow_lin, 'b-', label='Linear Valve')
+    ax1.plot(lift, flow_ep, 'r--', label='Equal Percentage Valve')
+    ax1.plot([0, 1], [0, 9.4], 'k-', linewidth=2, label='Desired Profile')
+    ax1.set_xlabel('Lift (fraction open)')
+    ax1.set_ylabel('Flow (arbitrary units)')
+    ax1.set_title('Flow vs. Lift')
+    ax1.legend(loc='best')
+    ax1.grid(True)
+    plt.tight_layout(pad=0.5)
+    st.pyplot(fig1)
+    
+    # -----------------------------------------------------------------------------
+    # Plots 2 & 3: Pressure drops (side by side)
+    # -----------------------------------------------------------------------------
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        fig2, ax2 = plt.subplots(figsize=(4, 3))
+        ax2.plot(lift, DPt - DPe(flow_lin), 'k:', linewidth=2, label='Valve ΔP (Linear)')
+        ax2.plot(lift, DPe(flow_lin), 'r--', linewidth=2, label='Equipment ΔP')
+        ax2.set_xlabel('Lift')
+        ax2.set_ylabel('ΔP')
+        ax2.set_title('Pressure Drops – Linear Valve', fontsize=11)
+        ax2.legend(fontsize=8)
+        ax2.grid(True)
+        plt.tight_layout(pad=0.5)
+        st.pyplot(fig2)
+    
+    with col2:
+        fig3, ax3 = plt.subplots(figsize=(4, 3))
+        ax3.plot(lift, DPt - DPe(flow_ep), 'k:', linewidth=2, label='Valve ΔP (Equal %)')
+        ax3.plot(lift, DPe(flow_ep), 'r--', linewidth=2, label='Equipment ΔP')
+        ax3.set_xlabel('Lift')
+        ax3.set_ylabel('ΔP')
+        ax3.set_title('Pressure Drops – Equal-Percentage Valve', fontsize=11)
+        ax3.legend(fontsize=8)
+        ax3.grid(True)
+        plt.tight_layout(pad=0.5)
+        st.pyplot(fig3)
 # -----------------------------------------------------------------------------
 # Footer and optional data table
 # -----------------------------------------------------------------------------
-st.markdown("---")
-st.subheader("Numerical Data (Sample Points)")
-data = {
-    "Lift": lift,
-    "Flow (Linear)": flow_lin,
-    "Flow (Equal %)": flow_ep,
-    "ΔP Equipment (Linear)": DPe(flow_lin),
-    "ΔP Equipment (Equal %)": DPe(flow_ep)
-}
-st.dataframe(data)
-
 st.success(f"Simulation complete: Cv={Cv:.2f}, R={R:.1f}")
 
 # Optional: CSV download
