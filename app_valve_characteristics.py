@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# In[ ]:
-
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Streamlit App: Control Valve Characteristics (Installed Performance)
 - Interactive visualization of linear vs. equal-percentage trims
-- Adapted from original ipywidgets version
+- Adapted from Dr. John Hedengren's original ipywidgets version
 - Compatible with: streamlit run app_valve_characteristics.py
 """
 
