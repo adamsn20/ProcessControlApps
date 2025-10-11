@@ -83,22 +83,22 @@ st.sidebar.slider(
 )
 
 st.sidebar.slider(
-    "Total Pressure Drop (ΔPt)",
-    min_value=1.0,
-    max_value=20.0,
-    value=st.session_state.DPt,
-    step=0.5,
-    key="DPt",
-    on_change=recompute
-)
-
-st.sidebar.slider(
     "Equal-Percentage R Factor",
     min_value=10.0,
     max_value=50.0,
     value=st.session_state.R,
     step=1.0,
     key="R",
+    on_change=recompute
+)
+
+st.sidebar.slider(
+    "Total Pressure Drop (ΔPt)",
+    min_value=1.0,
+    max_value=20.0,
+    value=st.session_state.DPt,
+    step=0.5,
+    key="DPt",
     on_change=recompute
 )
 
