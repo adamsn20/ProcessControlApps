@@ -147,9 +147,9 @@ desired_profile = pd.DataFrame({
 
 st.subheader("Flow vs. Lift")
 if st.session_state.show_profile:
-    st.line_chart(desired_profile, x_label = "Lift", y_label = "Flow")
+    st.line_chart(desired_profile, color = ["#0000FF","##FF0000","#000000"], x_label = "Lift", y_label = "Flow")
 else:
-    st.line_chart(flow_data, x_label = "Lift", y_label = "Flow")
+    st.line_chart(flow_data, color = ["#0000FF","##FF0000"], x_label = "Lift", y_label = "Flow")
 
 # -----------------------------------------------------------------
 # Plot 2 & 3: Pressure Drops (side-by-side)
@@ -163,7 +163,7 @@ with col1:
         "Valve ΔP (Linear)": DPt - DPe(flow_lin),
         "Equipment ΔP": DPe(flow_lin),
     }).set_index("Lift")
-    st.line_chart(dp_linear_data, x_label = "Lift", y_label = "ΔP")
+    st.line_chart(dp_linear_data, color = ["#00FFFF","#0000FF"], x_label = "Lift", y_label = "ΔP")
 
 with col2:
     st.subheader("Pressure Drops – Equal-Percentage Valve")
@@ -172,7 +172,7 @@ with col2:
         "Valve ΔP (Equal %)": DPt - DPe(flow_ep),
         "Equipment ΔP": DPe(flow_ep),
     }).set_index("Lift")
-    st.line_chart(dp_equal_data, x_label = "Lift", y_label = "ΔP")
+    st.line_chart(dp_equal_data, color = ["#00FFFF","#0000FF"], x_label = "Lift", y_label = "ΔP")
 
 # -----------------------------------------------------------------
 # Footer and Data Table
