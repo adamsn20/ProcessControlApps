@@ -154,7 +154,7 @@ else:
 # -----------------------------------------------------------------
 # Plot 2 & 3: Pressure Drops (side-by-side)
 # -----------------------------------------------------------------
-st.subheader("Pressure Drops"
+st.subheader("Pressure Drops")
 col1, col2 = st.columns(2)
 
 with col1:
