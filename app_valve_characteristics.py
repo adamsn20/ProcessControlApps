@@ -154,10 +154,11 @@ else:
 # -----------------------------------------------------------------
 # Plot 2 & 3: Pressure Drops (side-by-side)
 # -----------------------------------------------------------------
+st.subheader("Pressure Drops"
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Linear Valve Pressure Drop")
+    st.subheader("Linear Valve")
     dp_linear_data = pd.DataFrame({
         "Lift": lift,
         "Valve ΔP (Linear)": DPt - DPe(flow_lin),
@@ -166,7 +167,7 @@ with col1:
     st.line_chart(dp_linear_data, color = ["#00FFFF","#0000FF"], x_label = "Lift", y_label = "ΔP")
 
 with col2:
-    st.subheader("Equal-Percent Valve Pressure Drop")
+    st.subheader("Equal-Percentage Valve")
     dp_equal_data = pd.DataFrame({
         "Lift": lift,
         "Valve ΔP (Equal %)": DPt - DPe(flow_ep),
