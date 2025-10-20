@@ -118,8 +118,10 @@ if st.session_state.recompute_flag:
     flow_lin = qi(lift, f_lin, Cv, R, DPt)
     flow_ep = qi(lift, f_ep, Cv, R, DPt)
 
-    # Store data for download
-    data = {
+    st.session_state.lift = lift
+    st.session_state.flow_lin = flow_lin
+    st.session_state.flow_ep = flow_ep
+    st.session_state.data = {
         "Lift": lift,
         "Flow_Linear": flow_lin,
         "Flow_Equal%": flow_ep,
@@ -128,6 +130,11 @@ if st.session_state.recompute_flag:
         "EquipDP_Linear": DPe(flow_lin),
         "EquipDP_Equal%": DPe(flow_ep),
     }
+
+lift = st.session_state.lift
+flow_lin = st.session_state.flow_lin
+flow_ep = st.session_state.flow_ep
+data = st.session_state.data
 
 # -----------------------------------------------------------------
 # Plot 1: Flow vs. Lift
