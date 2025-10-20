@@ -137,7 +137,6 @@ flow_data = pd.DataFrame({
     "Linear Valve": flow_lin,
     "Equal Percentage Valve": flow_ep,
 }).set_index("Lift")
-st.subheader("Flow vs. Lift")
 
 desired_profile = pd.DataFrame({
     "Lift": lift,
@@ -145,13 +144,12 @@ desired_profile = pd.DataFrame({
     "Equal Percentage Valve": flow_ep,
     "Desired Profile": np.linspace(0, 9.4, 100)
 }).set_index("Lift")
+
 st.subheader("Flow vs. Lift")
-
-
 if st.session_state.show_profile:
-    st.line_chart(desired_profile)
+    st.line_chart(desired_profile, x_label = "Lift", y_label = "Flow")
 else:
-    st.line_chart(flow_data)
+    st.line_chart(flow_data, x_label = "Lift", y_label = "Flow")
 
 # -----------------------------------------------------------------
 # Plot 2 & 3: Pressure Drops (side-by-side)
@@ -165,7 +163,7 @@ with col1:
         "Valve ΔP (Linear)": DPt - DPe(flow_lin),
         "Equipment ΔP": DPe(flow_lin),
     }).set_index("Lift")
-    st.line_chart(dp_linear_data)
+    st.line_chart(dp_linear_data, x_label = "Lift", y_label = "ΔP")
 
 with col2:
     st.subheader("Pressure Drops – Equal-Percentage Valve")
@@ -174,7 +172,7 @@ with col2:
         "Valve ΔP (Equal %)": DPt - DPe(flow_ep),
         "Equipment ΔP": DPe(flow_ep),
     }).set_index("Lift")
-    st.line_chart(dp_equal_data)
+    st.line_chart(dp_equal_data, x_label = "Lift", y_label = "ΔP")
 
 # -----------------------------------------------------------------
 # Footer and Data Table
