@@ -147,9 +147,9 @@ desired_profile = pd.DataFrame({
 
 st.subheader("Flow vs. Lift")
 if st.session_state.show_profile:
-    st.line_chart(desired_profile, color = ["#0000FF","##FF0000","#000000"], x_label = "Lift", y_label = "Flow")
+    st.line_chart(desired_profile, color = ["#0000FF","#FF0000","#000000"], x_label = "Lift", y_label = "Flow")
 else:
-    st.line_chart(flow_data, color = ["#0000FF","##FF0000"], x_label = "Lift", y_label = "Flow")
+    st.line_chart(flow_data, color = ["#0000FF","#FF0000"], x_label = "Lift", y_label = "Flow")
 
 # -----------------------------------------------------------------
 # Plot 2 & 3: Pressure Drops (side-by-side)
