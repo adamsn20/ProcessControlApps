@@ -8,7 +8,6 @@ Streamlit App: Control Valve Characteristics (Installed Performance)
 
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 # -------------------------------------------------------------------------
@@ -130,63 +129,59 @@ if st.session_state.recompute_flag:
         "EquipDP_Equal%": DPe(flow_ep),
     }
 
-    # -----------------------------------------------------------------
-    # Plot 1: Flow vs. Lift
-    # -----------------------------------------------------------------
-    fig1, ax1 = plt.subplots(figsize=(7, 3))
-    ax1.plot(lift, flow_lin, 'b-', label='Linear Valve')
-    ax1.plot(lift, flow_ep, 'r--', label='Equal Percentage Valve')
-    
-    # Add desired profile if checkbox is selected
-    if st.session_state.show_profile:
-        ax1.plot([0, 1], [0, 9.4], 'k-', linewidth=2, label='Desired Profile')
-    
-    ax1.set_xlabel('Lift')
-    ax1.set_ylabel('Flow')
-    ax1.set_title('Flow vs. Lift')
-    ax1.legend()
-    ax1.grid(True)
-    plt.tight_layout(pad=0.5)
-    st.pyplot(fig1)
+# -----------------------------------------------------------------
+# Plot 1: Flow vs. Lift
+# -----------------------------------------------------------------
+flow_data = pd.DataFrame({
+    "Lift": lift,
+    "Linear Valve": flow_lin,
+    "Equal Percentage Valve": flow_ep,
+}).set_index("Lift")
+st.subheader("Flow vs. Lift")
+st.line_chart(flow_data)
 
-    # -----------------------------------------------------------------
-    # Plot 2 & 3: Pressure Drops (side-by-side)
-    # -----------------------------------------------------------------
-    col1, col2 = st.columns(2)
+if st.session_state.show_profile:
+    desired_profile = pd.DataFrame({
+        "Lift": lift,
+        "Linear Valve": flow_lin,
+        "Equal Percentage Valve": flow_ep,
+        "Desired Profile": np.linspace(0, 9.4, 100)
+    }).set_index("Lift")
+    st.subheader("Flow vs. Lift")
+    st.line_chart(desired_profile)
 
-    with col1:
-        fig2, ax2 = plt.subplots(figsize=(4, 3))
-        ax2.plot(lift, DPt - DPe(flow_lin), 'k:', linewidth=2, label='Valve ΔP (Linear)')
-        ax2.plot(lift, DPe(flow_lin), 'r--', linewidth=2, label='Equipment ΔP')
-        ax2.set_title('Pressure Drops – Linear Valve', fontsize=11)
-        ax2.set_xlabel('Lift')
-        ax2.set_ylabel('ΔP')
-        ax2.legend(fontsize=8)
-        ax2.grid(True)
-        plt.tight_layout(pad=0.5)
-        st.pyplot(fig2)
+# -----------------------------------------------------------------
+# Plot 2 & 3: Pressure Drops (side-by-side)
+# -----------------------------------------------------------------
+col1, col2 = st.columns(2)
 
-    with col2:
-        fig3, ax3 = plt.subplots(figsize=(4, 3))
-        ax3.plot(lift, DPt - DPe(flow_ep), 'k:', linewidth=2, label='Valve ΔP (Equal %)')
-        ax3.plot(lift, DPe(flow_ep), 'r--', linewidth=2, label='Equipment ΔP')
-        ax3.set_title('Pressure Drops – Equal-Percentage Valve', fontsize=11)
-        ax3.set_xlabel('Lift')
-        ax3.set_ylabel('ΔP')
-        ax3.legend(fontsize=8)
-        ax3.grid(True)
-        plt.tight_layout(pad=0.5)
-        st.pyplot(fig3)
+with col1:
+    st.subheader("Pressure Drops – Linear Valve")
+    dp_linear_data = pd.DataFrame({
+        "Lift": lift,
+        "Valve ΔP (Linear)": DPt - DPe(flow_lin),
+        "Equipment ΔP": DPe(flow_lin),
+    }).set_index("Lift")
+    st.line_chart(dp_linear_data)
 
-    # -----------------------------------------------------------------
-    # Footer and Data Table
-    # -----------------------------------------------------------------
-    st.success(f"Simulation complete: Cv={Cv:.2f}, R={R:.1f}, ΔPt={DPt:.1f}")
+with col2:
+    st.subheader("Pressure Drops – Equal-Percentage Valve")
+    dp_equal_data = pd.DataFrame({
+        "Lift": lift,
+        "Valve ΔP (Equal %)": DPt - DPe(flow_ep),
+        "Equipment ΔP": DPe(flow_ep),
+    }).set_index("Lift")
+    st.line_chart(dp_equal_data)
 
-    df = pd.DataFrame(data)
-    st.download_button(
-        "Download Data as CSV",
-        df.to_csv(index=False),
-        file_name="valve_performance.csv",
-        mime="text/csv"
-    )
+# -----------------------------------------------------------------
+# Footer and Data Table
+# -----------------------------------------------------------------
+st.success(f"Simulation complete: Cv={Cv:.2f}, R={R:.1f}, ΔPt={DPt:.1f}")
+
+df = pd.DataFrame(data)
+st.download_button(
+    "Download Data as CSV",
+    df.to_csv(index=False),
+    file_name="valve_performance.csv",
+    mime="text/csv"
+)
