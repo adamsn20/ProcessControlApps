@@ -130,11 +130,18 @@ if st.session_state.recompute_flag:
         "EquipDP_Linear": DPe(flow_lin),
         "EquipDP_Equal%": DPe(flow_ep),
     }
+    st.session_state.Cv_value = Cv
+    st.session_state.DPt_value = DPt
+    st.session_state.R_value = R
 
+# Always retrieve data from session_state
 lift = st.session_state.lift
 flow_lin = st.session_state.flow_lin
 flow_ep = st.session_state.flow_ep
 data = st.session_state.data
+Cv = st.session_state.Cv_value
+DPt = st.session_state.DPt_value
+R = st.session_state.R_value
 
 # -----------------------------------------------------------------
 # Plot 1: Flow vs. Lift
