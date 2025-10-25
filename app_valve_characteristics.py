@@ -43,105 +43,58 @@ def qi(x, f, Cv, R, DPt):
     """Flow rate through the valve and process system."""
     return np.sqrt((Cv * f(x, R))**2 * DPt / (g_s + (Cv * f(x, R))**2 * c1))
 
-def recompute():
-    """Callback triggered when a slider changes."""
-    st.session_state.recompute_flag = True
-
-# -------------------------------------------------------------------------
-# Initialize session state
-# -------------------------------------------------------------------------
-if "Cv" not in st.session_state:
-    st.session_state.Cv = 5.0
-if "DPt" not in st.session_state:
-    st.session_state.DPt = 100.0
-if "R" not in st.session_state:
-    st.session_state.R = R_default
-if "recompute_flag" not in st.session_state:
-    st.session_state.recompute_flag = True
-
 # -------------------------------------------------------------------------
 # Sidebar controls
 # -------------------------------------------------------------------------
 st.sidebar.header("Valve Settings")
 
-st.sidebar.slider(
+Cv = st.sidebar.slider(
     "Valve Coefficient (Cv)",
     min_value=0.1,
     max_value=10.0,
-    value=st.session_state.Cv,
+    value=st.session_state.get("Cv", 5.0),
     step=0.1,
-    key="Cv",
-    on_change=recompute
 )
 
-st.sidebar.slider(
+R = st.sidebar.slider(
     "Equal-Percentage R Factor",
     min_value=10.0,
     max_value=50.0,
-    value=st.session_state.R,
+    value=st.session_state.get("R", 30.0),
     step=1.0,
-    key="R",
-    on_change=recompute
 )
 
-st.sidebar.slider(
+DPt = st.sidebar.slider(
     "Total Pressure Drop (ΔPt)",
     min_value=1.0,
     max_value=100.0,
-    value=st.session_state.DPt,
+    value=st.session_state.get("DPt", 100.0),
     step=0.5,
-    key="DPt",
-    on_change=recompute
 )
 
-# -------------------------------------------------------------------------
-# Optional overlay: desired profile
-# -------------------------------------------------------------------------
 show_desired_profile = st.sidebar.checkbox(
     "Show Desired Profile",
     value=False,
     help="Add a black reference line to the Flow vs. Lift plot.",
-    key="show_profile",
-    on_change=recompute
 )
+
 # -------------------------------------------------------------------------
 # Compute and plot
 # -------------------------------------------------------------------------
-if st.session_state.recompute_flag:
-    st.session_state.recompute_flag = False
 
-    Cv = st.session_state.Cv
-    DPt = st.session_state.DPt
-    R = st.session_state.R
+lift = np.linspace(0, 1, 100)
+flow_lin = qi(lift, f_lin, Cv, R, DPt)
+flow_ep = qi(lift, f_ep, Cv, R, DPt)
 
-    lift = np.linspace(0, 1, 100)
-    flow_lin = qi(lift, f_lin, Cv, R, DPt)
-    flow_ep = qi(lift, f_ep, Cv, R, DPt)
-
-    st.session_state.lift = lift
-    st.session_state.flow_lin = flow_lin
-    st.session_state.flow_ep = flow_ep
-    st.session_state.data = {
-        "Lift": lift,
-        "Flow_Linear": flow_lin,
-        "Flow_Equal%": flow_ep,
-        "ValveDP_Linear": DPt - DPe(flow_lin),
-        "ValveDP_Equal%": DPt - DPe(flow_ep),
-        "EquipDP_Linear": DPe(flow_lin),
-        "EquipDP_Equal%": DPe(flow_ep),
-    }
-    st.session_state.Cv_value = Cv
-    st.session_state.DPt_value = DPt
-    st.session_state.R_value = R
-
-# Always retrieve data from session_state
-lift = st.session_state.lift
-flow_lin = st.session_state.flow_lin
-flow_ep = st.session_state.flow_ep
-data = st.session_state.data
-Cv = st.session_state.Cv_value
-DPt = st.session_state.DPt_value
-R = st.session_state.R_value
+data = {
+    "Lift": lift,
+    "Flow_Linear": flow_lin,
+    "Flow_Equal%": flow_ep,
+    "ValveDP_Linear": DPt - DPe(flow_lin),
+    "ValveDP_Equal%": DPt - DPe(flow_ep),
+    "EquipDP_Linear": DPe(flow_lin),
+    "EquipDP_Equal%": DPe(flow_ep),
+}
 
 # -----------------------------------------------------------------
 # Plot 1: Flow vs. Lift
@@ -160,7 +113,7 @@ desired_profile = pd.DataFrame({
 }).set_index("Lift")
 
 st.subheader("Flow vs. Lift")
-if st.session_state.show_profile:
+if show_desired_profile:
     st.line_chart(desired_profile, color = ["#0000FF","#FF0000","#000000"], x_label = "Lift", y_label = "Flow")
 else:
     st.line_chart(flow_data, color = ["#0000FF","#FF0000"], x_label = "Lift", y_label = "Flow")
