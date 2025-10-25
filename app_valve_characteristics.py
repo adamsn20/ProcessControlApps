@@ -78,6 +78,12 @@ show_desired_profile = st.sidebar.checkbox(
     help="Add a black reference line to the Flow vs. Lift plot.",
 )
 
+# Update session state to make sliders reactive
+st.session_state.Cv = Cv
+st.session_state.R = R
+st.session_state.DPt = DPt
+st.session_state.show_desired_profile = show_desired_profile
+
 # -------------------------------------------------------------------------
 # Compute and plot
 # -------------------------------------------------------------------------
