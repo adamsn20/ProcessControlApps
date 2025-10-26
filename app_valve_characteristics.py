@@ -56,7 +56,7 @@ def trigger_update():
     """Trigger recompute when live update is active."""
     if live_update:
         st.session_state["force_rerun"] = not st.session_state.get("force_rerun", False)
-        st.experimental_rerun()
+        st.rerun()
 
 Cv = st.sidebar.slider(
     "Valve Coefficient (Cv)",
