@@ -46,33 +46,46 @@ def qi(x, f, Cv, R, DPt):
 # -------------------------------------------------------------------------
 # Sidebar controls
 # -------------------------------------------------------------------------
-# -------------------------------------------------------------------------
-# Sidebar controls
-# -------------------------------------------------------------------------
 st.sidebar.header("Valve Settings")
+
+# Live update toggle
+live_update = st.sidebar.toggle("Live Update", value=False, help="Enable to update plots in real-time as sliders move.")
+
+# Sliders with live update callback
+def trigger_update():
+    """Trigger recompute when live update is active."""
+    if live_update:
+        st.session_state["force_rerun"] = not st.session_state.get("force_rerun", False)
+        st.experimental_rerun()
 
 Cv = st.sidebar.slider(
     "Valve Coefficient (Cv)",
     min_value=0.1,
     max_value=10.0,
-    value=5.0,
+    value=st.session_state.get("Cv", 5.0),
     step=0.1,
+    key="Cv",
+    on_change=trigger_update
 )
 
 R = st.sidebar.slider(
     "Equal-Percentage R Factor",
     min_value=10.0,
     max_value=50.0,
-    value=30.0,
+    value=st.session_state.get("R", 30.0),
     step=1.0,
+    key="R",
+    on_change=trigger_update
 )
 
 DPt = st.sidebar.slider(
     "Total Pressure Drop (ΔPt)",
     min_value=1.0,
     max_value=100.0,
-    value=100.0,
+    value=st.session_state.get("DPt", 100.0),
     step=0.5,
+    key="DPt",
+    on_change=trigger_update
 )
 
 show_desired_profile = st.sidebar.checkbox(
@@ -108,12 +121,8 @@ flow_data = pd.DataFrame({
     "Equal Percentage Valve": flow_ep,
 }).set_index("Lift")
 
-desired_profile = pd.DataFrame({
-    "Lift": lift,
-    "Linear Valve": flow_lin,
-    "Equal Percentage Valve": flow_ep,
-    "Desired Profile": np.linspace(0, 9.4, 100)
-}).set_index("Lift")
+desired_profile = flow_data.copy()
+desired_profile["Desired Profile"] = np.linspace(0, 9.4, 100)
 
 st.subheader("Flow vs. Lift")
 if show_desired_profile:
