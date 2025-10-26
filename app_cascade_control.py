@@ -1,13 +1,14 @@
 """
 Streamlit App: PI vs. Cascade Control
 - Interactive visualization comparing standard PI control and cascade control
-- Uses only Streamlit charts (st.line_chart)
+- Adapted from Dr. John Hedengren's original ipywidgets version
 - Compatible with: streamlit run app_cascade_control.py
 """
 
 import streamlit as st
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 # -------------------------------------------------------------------------
@@ -15,13 +16,13 @@ from scipy.integrate import odeint
 # -------------------------------------------------------------------------
 st.set_page_config(page_title="PI vs. Cascade Control", layout="wide")
 st.title("PI vs. Cascade Control Simulation")
-st.caption("Compare a single-loop PI controller with a two-loop cascade control structure.")
+st.caption("Compare a single-loop PI controller to a two-loop cascade control structure.")
 
 # -------------------------------------------------------------------------
-# Constants
+# Constants and parameters
 # -------------------------------------------------------------------------
-n = 1201
-tf = 1200.0
+n = 1201   # time points
+tf = 1200.0  # total time
 Kp = 0.8473
 Kd = 0.3
 taus = 51.08
@@ -43,7 +44,7 @@ def process(z, t, u):
 # Simulation functions
 # -------------------------------------------------------------------------
 def simulate_PI(Kc, tauI):
-    """Standard PI control."""
+    """Simulate standard PI control."""
     t = np.linspace(0, tf, n)
     P, I, e, ie = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
     OP = np.zeros(n)
@@ -70,7 +71,7 @@ def simulate_PI(Kc, tauI):
 
 
 def simulate_cascade(Kc1, tauI1, Kc2, tauI2):
-    """Cascade control simulation."""
+    """Simulate cascade control."""
     t = np.linspace(0, tf, n)
     P1, I1, e1, ie1 = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
     P2, I2, e2, ie2 = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
@@ -109,14 +110,14 @@ def simulate_cascade(Kc1, tauI1, Kc2, tauI2):
     return t, PV1, PV2, SP1, SP2, OP, iae
 
 # -------------------------------------------------------------------------
-# Sidebar controls
+# Sidebar Controls
 # -------------------------------------------------------------------------
-st.sidebar.header("Controller Settings")
+st.sidebar.header("Simulation Settings")
 
 mode = st.sidebar.radio(
-    "Control Type",
+    "Select Control Type",
     ["PI Control", "Cascade Control"],
-    help="Choose between standard PI and two-loop cascade control."
+    help="Choose between standard PI and two-loop cascade structure."
 )
 
 if mode == "PI Control":
@@ -129,58 +130,68 @@ else:
     tauI2 = st.sidebar.slider("Outer Loop τI2", 5.0, 300.0, 150.0, 5.0)
 
 # -------------------------------------------------------------------------
-# Run simulation
+# Run Simulation
 # -------------------------------------------------------------------------
 if mode == "PI Control":
     t, PV1, PV2, SP2, OP, iae = simulate_PI(Kc, tauI)
-    df = pd.DataFrame({
-        "Time (s)": t,
-        "Temperature 1": PV1,
-        "Temperature 2": PV2,
-        "Setpoint": SP2,
-        "Heater Output": OP
-    })
 else:
     t, PV1, PV2, SP1, SP2, OP, iae = simulate_cascade(Kc1, tauI1, Kc2, tauI2)
+
+# -------------------------------------------------------------------------
+# Plot Results
+# -------------------------------------------------------------------------
+st.subheader("Temperature Responses")
+
+fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+ax[0].plot(t, PV1, "r-", label="Temperature 1")
+ax[0].plot(t, PV2, "b--", label="Temperature 2")
+if mode == "Cascade Control":
+    ax[0].plot(t, SP1, "k:", label="T1 Setpoint (SP1)")
+ax[0].plot(t, SP2, "k-", label="T2 Setpoint (SP2)")
+ax[0].set_xlabel("Time (sec)")
+ax[0].set_ylabel("Temperature (°C)")
+ax[0].legend(loc="best")
+ax[0].grid(True)
+
+ax[1].plot(t, OP, "r-", label="Heater Output (%)")
+ax[1].set_xlabel("Time (sec)")
+ax[1].set_ylabel("Heater (%)")
+ax[1].legend(loc="best")
+ax[1].grid(True)
+st.pyplot(fig)
+
+# -------------------------------------------------------------------------
+# Performance Metrics
+# -------------------------------------------------------------------------
+if mode == "PI Control":
+    st.success(f"PI Control Results → Kc={Kc:.2f}, τI={tauI:.1f}, IAE={iae:.1f}")
+else:
+    st.success(f"Cascade Control Results → Kc1={Kc1:.2f}, τI1={tauI1:.1f}, Kc2={Kc2:.2f}, τI2={tauI2:.1f}, IAE={iae:.1f}")
+
+# -------------------------------------------------------------------------
+# Data Download
+# -------------------------------------------------------------------------
+if mode == "PI Control":
     df = pd.DataFrame({
-        "Time (s)": t,
-        "Temperature 1": PV1,
-        "Temperature 2": PV2,
-        "Setpoint 1": SP1,
-        "Setpoint 2": SP2,
-        "Heater Output": OP
+        "Time": t,
+        "Temperature1": PV1,
+        "Temperature2": PV2,
+        "Setpoint": SP2,
+        "Heater": OP
+    })
+else:
+    df = pd.DataFrame({
+        "Time": t,
+        "Temperature1": PV1,
+        "Temperature2": PV2,
+        "Setpoint1": SP1,
+        "Setpoint2": SP2,
+        "Heater": OP
     })
 
-# -------------------------------------------------------------------------
-# Streamlit line charts
-# -------------------------------------------------------------------------
-st.subheader("Temperature Response")
-
-if mode == "PI Control":
-    temp_df = df[["Time (s)", "Temperature 1", "Temperature 2", "Setpoint"]].set_index("Time (s)")
-else:
-    temp_df = df[["Time (s)", "Temperature 1", "Temperature 2", "Setpoint 1", "Setpoint 2"]].set_index("Time (s)")
-
-st.line_chart(temp_df, x_label="Time (s)", y_label="Temperature (°C)")
-
-st.subheader("Heater Output (%)")
-op_df = df[["Time (s)", "Heater Output"]].set_index("Time (s)")
-st.line_chart(op_df, x_label="Time (s)", y_label="Heater (%)")
-
-# -------------------------------------------------------------------------
-# Results summary
-# -------------------------------------------------------------------------
-if mode == "PI Control":
-    st.success(f"PI Control → Kc={Kc:.2f}, τI={tauI:.1f}, IAE={iae:.1f}")
-else:
-    st.success(f"Cascade Control → Kc1={Kc1:.2f}, τI1={tauI1:.1f}, Kc2={Kc2:.2f}, τI2={tauI2:.1f}, IAE={iae:.1f}")
-
-# -------------------------------------------------------------------------
-# Download data
-# -------------------------------------------------------------------------
 st.download_button(
-    label="Download Simulation Data as CSV",
-    data=df.to_csv(index=False),
+    "Download Simulation Data as CSV",
+    df.to_csv(index=False),
     file_name=f"{mode.replace(' ', '_').lower()}_data.csv",
     mime="text/csv"
 )
