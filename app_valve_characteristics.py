@@ -46,13 +46,16 @@ def qi(x, f, Cv, R, DPt):
 # -------------------------------------------------------------------------
 # Sidebar controls
 # -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Sidebar controls
+# -------------------------------------------------------------------------
 st.sidebar.header("Valve Settings")
 
 Cv = st.sidebar.slider(
     "Valve Coefficient (Cv)",
     min_value=0.1,
     max_value=10.0,
-    value=st.session_state.get("Cv", 5.0),
+    value=5.0,
     step=0.1,
 )
 
@@ -60,7 +63,7 @@ R = st.sidebar.slider(
     "Equal-Percentage R Factor",
     min_value=10.0,
     max_value=50.0,
-    value=st.session_state.get("R", 30.0),
+    value=30.0,
     step=1.0,
 )
 
@@ -68,7 +71,7 @@ DPt = st.sidebar.slider(
     "Total Pressure Drop (ΔPt)",
     min_value=1.0,
     max_value=100.0,
-    value=st.session_state.get("DPt", 100.0),
+    value=100.0,
     step=0.5,
 )
 
@@ -77,12 +80,6 @@ show_desired_profile = st.sidebar.checkbox(
     value=False,
     help="Add a black reference line to the Flow vs. Lift plot.",
 )
-
-# Update session state to make sliders reactive
-st.session_state.Cv = Cv
-st.session_state.R = R
-st.session_state.DPt = DPt
-st.session_state.show_desired_profile = show_desired_profile
 
 # -------------------------------------------------------------------------
 # Compute and plot
